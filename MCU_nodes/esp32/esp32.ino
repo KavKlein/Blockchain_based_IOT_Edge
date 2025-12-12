@@ -105,18 +105,30 @@ void loop() {
 
     
     // Create JSON payload
-    String payload = "{";
-    payload += "\"nodeId\":\"" + NODE_ID + "\",";
-    payload += "\"type\":\"humidity\",";
-    payload += "\"value\":" + String(humidity, 2) + ",";
-    payload += "\"protocol\":\"WIFI_MQTT\"";
-    payload += "}";
+    // MESSAGE 1: Send temperature
+    String tempPayload = "{";
+    tempPayload += "\"nodeId\":\"" + NODE_ID + "\",";
+    tempPayload += "\"type\":\"temperature\",";
+    tempPayload += "\"value\":" + String(temperature, 2) + ",";
+    tempPayload += "\"protocol\":\"WIFI_MQTT\"";
+    tempPayload += "}";
     
-    // Publish to MQTT
-    if (mqttClient.publish(MQTT_TOPIC, payload.c_str())) {
-      Serial.println("📤 Data sent: " + payload);
-    } else {
-      Serial.println("❌ Failed to send data");
+    if (mqttClient.publish(MQTT_TOPIC, tempPayload.c_str())) {
+      Serial.println("📤 Temperature sent: " + String(temperature, 2) + "°C");
+    }
+    
+    delay(500); // Small delay between messages
+    
+    // MESSAGE 2: Send humidity
+    String humPayload = "{";
+    humPayload += "\"nodeId\":\"" + NODE_ID + "\",";
+    humPayload += "\"type\":\"humidity\",";
+    humPayload += "\"value\":" + String(humidity, 2) + ",";
+    humPayload += "\"protocol\":\"WIFI_MQTT\"";
+    humPayload += "}";
+    
+    if (mqttClient.publish(MQTT_TOPIC, humPayload.c_str())) {
+      Serial.println("📤 Humidity sent: " + String(humidity, 2) + "%");
     }
   }
 }

@@ -34,8 +34,20 @@ console.log('─'.repeat(60));
 // BLOCKCHAIN LOGGING FUNCTION
 // ============================================
 
+// Track last transaction time
+let lastTransactionTime = 0;
+const MIN_TRANSACTION_DELAY = 200; // 200ms between transactions
+
 async function logToBlockchain(sensorData) {
   try {
+
+   // Wait if last transaction was too recent
+    const now = Date.now();
+    const timeSinceLastTx = now - lastTransactionTime;
+    if (timeSinceLastTx < MIN_TRANSACTION_DELAY) {
+      await new Promise(resolve => setTimeout(resolve, MIN_TRANSACTION_DELAY - timeSinceLastTx));
+    }
+
     const { nodeId, type, value, protocol } = sensorData;
     
     // Convert float to integer (multiply by 100 for 2 decimal precision)
@@ -54,6 +66,9 @@ async function logToBlockchain(sensorData) {
         from: gatewayAccount.address,
         gas: 500000
       });
+
+    // Update last transaction time
+    lastTransactionTime = Date.now();
     
     console.log(`✅ Success! TX Hash: ${receipt.transactionHash}`);
     console.log(`   Gas Used: ${receipt.gasUsed}`);
