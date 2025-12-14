@@ -8,7 +8,7 @@ module.exports = {
       url: "http://127.0.0.1:7545", // Ganache UI default RPC
       accounts: [
         // Add private keys from Ganache UI (click key icon next to accounts)
-        "0x22d846d6baa23b8f7acc9d1fbc04ff8bcf8b9c9eb22a676dbbb516c970dde7c5"
+        "0xd0db1718a2092021387df82fc5e9342c096387b3e11c0181aa1a96d5755fc3d6"
       ],
       chainId: 1337 // Ganache default chain ID
     }
