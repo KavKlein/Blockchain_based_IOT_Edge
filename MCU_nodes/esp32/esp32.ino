@@ -16,7 +16,7 @@ const char* SSID = "GalaxyA12E4D7";
 const char* PASSWORD = "123456789";
 
 // MQTT Broker (your laptop IP running the gateway)
-const char* MQTT_BROKER = "192.168.45.253";  
+const char* MQTT_BROKER = "192.168.106.253";  
 const int MQTT_PORT = 1883;
 const char* MQTT_TOPIC = "iot/sensordata";
 

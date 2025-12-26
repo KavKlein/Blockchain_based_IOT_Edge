@@ -17,7 +17,21 @@ const fs = require('fs');
 // ============================================
 
 //const web3 = new Web3(process.env.GANACHE_URL);
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.GANACHE_URL));
+//const web3 = new Web3(new Web3.providers.HttpProvider(process.env.GANACHE_URL));
+
+//replaced the http prvider with a http keep alive function to prevent tcp port reset
+const agent = new (require('http').Agent)({
+  keepAlive: true,
+  maxSockets: 1
+});
+
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(process.env.GANACHE_URL, {
+    agent,
+    timeout: 10000
+  })
+);
+
 const contractABI = JSON.parse(fs.readFileSync('contract-abi.json', 'utf8'));
 const contract = new web3.eth.Contract(contractABI, process.env.CONTRACT_ADDRESS);
 
@@ -30,8 +44,9 @@ console.log('📜 Contract Address:', process.env.CONTRACT_ADDRESS);
 console.log('🔗 Ganache URL:', process.env.GANACHE_URL);
 console.log('─'.repeat(60));
 
+/*
 // ============================================
-// BLOCKCHAIN LOGGING FUNCTION
+// BLOCKCHAIN LOGGING FUNCTION (Timing)
 // ============================================
 
 // Track last transaction time
@@ -81,6 +96,76 @@ async function logToBlockchain(sensorData) {
     return null;
   }
 }
+  */
+
+//new login function with serialized pipeline
+// ============================================
+// BLOCKCHAIN LOGGING FUNCTION (SERIALIZED QUEUE)
+// ============================================
+
+let txInProgress = false;
+const txQueue = [];
+
+/**
+ * Enqueue sensor data for blockchain logging
+ */
+function logToBlockchain(sensorData) {
+  return new Promise((resolve, reject) => {
+    txQueue.push({ sensorData, resolve, reject });
+    processTxQueue();
+  });
+}
+
+/**
+ * Process blockchain transactions one-by-one
+ * (Ethereum nonce-safe)
+ */
+async function processTxQueue() {
+  if (txInProgress || txQueue.length === 0) return;
+
+  txInProgress = true;
+  const { sensorData, resolve, reject } = txQueue.shift();
+
+  try {
+    const { nodeId, type, value, protocol } = sensorData;
+
+    // Convert float → int (2 decimal precision)
+    const intValue = Math.floor(parseFloat(value) * 100);
+
+    console.log(`\n📝 Logging to blockchain...`);
+    console.log(`   Node: ${nodeId}`);
+    console.log(`   Type: ${type}`);
+    console.log(`   Value: ${value} (stored as ${intValue})`);
+    console.log(`   Protocol: ${protocol}`);
+
+    const receipt = await contract.methods
+      .logData(nodeId, type, intValue, protocol)
+      .send({
+        from: gatewayAccount.address,
+        gas: 500000
+      });
+
+    console.log(`✅ Success! TX Hash: ${receipt.transactionHash}`);
+    console.log(`   Gas Used: ${receipt.gasUsed}`);
+    console.log(`   Block: ${receipt.blockNumber}`);
+
+    resolve(receipt);
+
+  } catch (error) {
+    console.error('❌ Blockchain Error:', error.message);
+    if (error.message.includes('ECONNRESET')) {
+      console.warn('🔁 RPC connection reset — retrying transaction...');
+      txQueue.unshift({ sensorData, resolve, reject });
+    }
+
+    reject(error);
+
+  } finally {
+    txInProgress = false;
+    processTxQueue(); // process next tx
+  }
+}
+
 
 // ============================================
 // SERIAL PORT (Arduino Uno)

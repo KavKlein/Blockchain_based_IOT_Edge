@@ -1,8 +1,8 @@
 import Web3 from 'web3';
 
 // Update these from your .env file
-export const GANACHE_URL = 'http://127.0.0.1:7545';
-export const CONTRACT_ADDRESS = '0x7BaEe83551bA2465fe53aa4f7358c962909A0F77';
+export const GANACHE_URL = 'http://127.0.0.1:8545';
+export const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 export const CONTRACT_ABI = [
     {
@@ -296,12 +296,12 @@ export const CONTRACT_ABI = [
 
 // Initialize Web3 Provider
 
-export const web3 = new Web3(new Web3.providers.HttpProvider(GANACHE_URL));
+//export const web3 = new Web3(new Web3.providers.HttpProvider(GANACHE_URL));
 
 
 
 // Initialize Web3
-//export const web3 = new Web3(GANACHE_URL);
+export const web3 = new Web3(GANACHE_URL);
 
 // Initialize Contract
 export const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);

@@ -8,11 +8,25 @@ function NodeStatus({ data }) {
   const esp32Humidity = data.filter(d => d.protocol === 'WIFI_MQTT' && d.dataType === 'humidity').slice(-1)[0];
   
   // Check if node is active (data within last 30 seconds)
+  //const isActive = (nodeData) => !!nodeData;
+
   const isActive = (nodeData) => {
     if (!nodeData) return false;
     const now = Math.floor(Date.now() / 1000);
-    return (now - nodeData.timestamp) < 30;
+    return (now - nodeData.timestamp) < 10;
   };
+  
+
+  /*
+  console.log(
+  'NOW:',
+  Math.floor(Date.now() / 1000),
+  'LAST:',
+  nodeData?.timestamp,
+  'DELTA:',
+  Math.floor(Date.now() / 1000) - nodeData?.timestamp
+);
+*/
   
   // ESP32 is online if either temp or humidity is recent
   const esp32Active = isActive(esp32Temp) || isActive(esp32Humidity);
