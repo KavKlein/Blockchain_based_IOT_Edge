@@ -13,7 +13,7 @@ function NodeStatus({ data }) {
   const isActive = (nodeData) => {
     if (!nodeData) return false;
     const now = Math.floor(Date.now() / 1000);
-    return (now - nodeData.timestamp) < 10;
+    return (now - nodeData.timestamp) < 20;
   };
   
 
