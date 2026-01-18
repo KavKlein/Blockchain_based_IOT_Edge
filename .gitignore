@@ -40,3 +40,10 @@ Thumbs.db
 
 # Ganache workspace
 **/Ganache.log
+# Large videos are shared on request
+*.mp4
+
+
+# Large videos are shared on request
+*.mp4
+
